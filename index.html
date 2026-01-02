@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceGuardian - Your AI Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      @keyframes soft-breathe {
+        0%, 100% { transform: scale(1); opacity: 0.3; filter: blur(40px); }
+        50% { transform: scale(1.1); opacity: 0.5; filter: blur(60px); }
+      }
+      @keyframes orbit {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes float-particle {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.2; }
+        50% { transform: translate(20px, -20px) rotate(180deg); opacity: 0.6; }
+      }
+      @keyframes flare-pulse {
+        0%, 100% { opacity: 0.8; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .animate-soul {
+        animation: soft-breathe 8s ease-in-out infinite;
+      }
+      .animate-orbit {
+        animation: orbit 20s linear infinite;
+      }
+      .animate-orbit-reverse {
+        animation: orbit 25s linear infinite reverse;
+      }
+      .animate-flare {
+        animation: flare-pulse 4s ease-in-out infinite;
+      }
+      .glass-surface {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .glow-text {
+        text-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+      }
+      body {
+        background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #020617 100%);
+      }
+      .celestial-glow {
+        background: radial-gradient(circle, rgba(165, 180, 252, 0.4) 0%, rgba(79, 70, 229, 0) 70%);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+  }
+}
+</script>
+</head>
+  <body class="text-slate-200 min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
+    <div id="root"></div>
+  </body>
+</html>

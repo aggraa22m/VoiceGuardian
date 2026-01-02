@@ -1,0 +1,7 @@
+{
+  "name": "VoiceGuardian",
+  "description": "An empathetic, voice-first AI companion designed for mental health check-ins, elder care, and focus coaching using real-time emotional reasoning.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
