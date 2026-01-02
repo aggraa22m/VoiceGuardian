@@ -1,10 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { GuardianMode, Message, SessionState } from './types';
 import { decode, encode, decodeAudioData, createPcmBlob } from './utils/audio';
-
-// --- Types ---
-type VoiceProvider = 'gemini' | 'elevenlabs';
 
 // --- Visual Components ---
 
@@ -14,10 +12,9 @@ const RadialSpikes = ({ volume, active }: { volume: number; active: boolean }) =
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
       {Array.from({ length: spikeCount }).map((_, i) => {
         const rotation = (i * 360) / spikeCount;
-        // Spikes extend further when talking
         const length = active ? 50 + volume * 220 : 15 + Math.sin(Date.now() / 1000 + i) * 5;
         const opacity = active ? 0.3 + volume * 0.7 : 0.1;
-        const color = active ? 'rgba(255, 255, 255, ' + opacity + ')' : 'rgba(129, 140, 248, 0.2)';
+        const color = active ? 'rgba(255, 255, 255, ' + opacity + ')' : 'rgba(255, 255, 255, 0.1)';
         
         return (
           <div
@@ -25,11 +22,11 @@ const RadialSpikes = ({ volume, active }: { volume: number; active: boolean }) =
             className="absolute origin-bottom transition-all duration-100 ease-out"
             style={{
               height: `${length}px`,
-              width: active ? '2px' : '1px',
+              width: active ? '3px' : '1px',
               bottom: '50%',
               transform: `rotate(${rotation}deg) translateY(-70px)`,
               background: `linear-gradient(to top, transparent, ${color}, white)`,
-              boxShadow: active ? `0 0 15px ${color}` : 'none',
+              boxShadow: active ? `0 0 15px white` : 'none',
               borderRadius: '4px'
             }}
           />
@@ -39,15 +36,14 @@ const RadialSpikes = ({ volume, active }: { volume: number; active: boolean }) =
   );
 };
 
-// Fix: Removed unused provider from prop type to resolve TS error
-const GuardianAura = ({ state, inVol, outVol }: { state: SessionState; inVol: number; outVol: number }) => {
+const GuardianAura = ({ state, inVol, outVol, minimal = false }: { state: SessionState; inVol: number; outVol: number; minimal?: boolean }) => {
   const activeVol = state.isTalking ? outVol : inVol;
   const scale = 1 + activeVol * 2.0;
   
-  const particles = Array.from({ length: 12 }).map((_, i) => (
+  const particles = !minimal && Array.from({ length: 12 }).map((_, i) => (
     <div 
       key={i}
-      className="absolute w-1.5 h-1.5 rounded-full bg-indigo-200/30 blur-[1px]"
+      className="absolute w-1.5 h-1.5 rounded-full bg-white/20 blur-[1px]"
       style={{
         top: `${Math.random() * 100}%`,
         left: `${Math.random() * 100}%`,
@@ -58,57 +54,46 @@ const GuardianAura = ({ state, inVol, outVol }: { state: SessionState; inVol: nu
   ));
 
   return (
-    <div className="relative flex items-center justify-center w-full aspect-square max-w-[320px] mx-auto transition-all duration-700">
-      {/* Background Particles */}
+    <div className={`relative flex items-center justify-center w-full aspect-square ${minimal ? 'max-w-[180px]' : 'max-w-[280px] sm:max-w-[320px]'} mx-auto transition-all duration-700`}>
       <div className="absolute inset-0 pointer-events-none overflow-visible">
         {particles}
       </div>
 
-      {/* Radial Spikes - Reactive to Voice */}
-      <RadialSpikes volume={outVol} active={state.isTalking} />
+      {!minimal && <RadialSpikes volume={outVol} active={state.isTalking} />}
 
-      {/* Main Ethereal Aura Layers */}
       <div 
         className={`absolute inset-0 rounded-full animate-soul transition-all duration-500 celestial-glow ${state.isTalking ? 'opacity-60' : 'opacity-30'}`}
         style={{ transform: `scale(${scale * 1.3})` }}
       />
       
-      {/* Orbital Ring System */}
       <div 
-        className="absolute inset-0 rounded-full border border-indigo-400/20 animate-orbit"
+        className="absolute inset-0 rounded-full border border-white/10 animate-orbit"
         style={{ transform: `scale(${scale * 1.1}) rotateX(65deg) rotateY(20deg)` }}
       />
       
       <div 
-        className="absolute inset-0 rounded-full border border-purple-400/10 animate-orbit-reverse"
+        className="absolute inset-0 rounded-full border border-white/5 animate-orbit-reverse"
         style={{ transform: `scale(${scale * 1.15}) rotateX(-40deg) rotateY(-25deg)` }}
       />
 
-      {/* The Core celestial Orb */}
       <div 
-        className={`relative w-40 h-40 rounded-full transition-all duration-150 shadow-[0_0_80px_rgba(99,102,241,0.4)] border border-white/20 flex items-center justify-center overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-600 to-indigo-400 z-10`}
+        className={`relative ${minimal ? 'w-20 h-20' : 'w-32 h-32 sm:w-40 sm:h-40'} rounded-full transition-all duration-150 shadow-[0_0_80px_rgba(255,255,255,0.1)] border border-white/30 flex items-center justify-center overflow-hidden bg-gradient-to-tr from-slate-950 via-indigo-950 to-indigo-800 z-10`}
         style={{ transform: `scale(${scale})` }}
       >
-        {/* Internal Glow Swirls */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.7),transparent_60%)] animate-flare" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(165,180,252,0.4),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.6),transparent_60%)] animate-flare" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(255,255,255,0.2),transparent_60%)]" />
         
-        {/* Energy Pulse Center */}
         {state.isTalking && (
           <div className="absolute inset-4 rounded-full bg-white/10 blur-2xl animate-pulse" />
         )}
 
-        {/* Mesh Grid Pattern */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-
-        {/* Bright Highlight Flare */}
-        <div className="absolute top-4 right-8 w-16 h-8 bg-white/40 blur-2xl rounded-full transform -rotate-45" />
+        <div className="absolute top-4 right-8 w-16 h-8 bg-white/30 blur-2xl rounded-full transform -rotate-45" />
       </div>
 
-      {/* Outer Pulse Shell - User Input Feedback */}
       {state.isListening && inVol > 0.05 && (
         <div 
-          className="absolute inset-0 rounded-full border-2 border-indigo-300/20 pointer-events-none animate-ping"
+          className="absolute inset-0 rounded-full border-2 border-white/20 pointer-events-none animate-ping"
           style={{ transform: `scale(${1 + inVol * 4})` }}
         />
       )}
@@ -126,18 +111,18 @@ const TranscriptView = ({ messages }: { messages: Message[] }) => {
   }, [messages]);
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 space-y-5 no-scrollbar">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-5 no-scrollbar">
       {messages.length === 0 && (
-        <div className="h-full flex flex-col items-center justify-center text-indigo-300/30 text-center tracking-widest font-light">
-          <p className="text-[10px] uppercase">Awaiting your presence</p>
+        <div className="h-full flex flex-col items-center justify-center text-center tracking-[0.4em]">
+          <p className="text-sm font-black text-white uppercase animate-pulse">Awaiting for your presence</p>
         </div>
       )}
       {messages.map((msg, idx) => (
         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-700`}>
-          <div className={`max-w-[85%] rounded-3xl px-6 py-3.5 glass-surface border-white/5 ${
-            msg.role === 'user' ? 'bg-indigo-500/10' : 'bg-white/[0.02]'
+          <div className={`max-w-[90%] rounded-2xl px-6 py-4 glass-surface ${
+            msg.role === 'user' ? 'bg-indigo-500/10' : 'bg-white/5'
           }`}>
-            <p className="text-sm leading-relaxed font-light text-indigo-100/90">{msg.text}</p>
+            <p className="text-base sm:text-lg leading-relaxed font-bold text-white">{msg.text}</p>
           </div>
         </div>
       ))}
@@ -145,9 +130,36 @@ const TranscriptView = ({ messages }: { messages: Message[] }) => {
   );
 };
 
+// --- Intro Animation ---
+
+const IntroSplash = ({ onFinish }: { onFinish: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onFinish, 4500);
+    return () => clearTimeout(timer);
+  }, [onFinish]);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#020617] p-8">
+      <div className="animate-splash flex flex-col items-center gap-12">
+        <GuardianAura 
+          state={{ isActive: false, isConnecting: false, isTalking: false, isListening: false }} 
+          inVol={0} 
+          outVol={0}
+          minimal={true}
+        />
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-black tracking-[0.8em] text-white uppercase glow-text">VoiceGuardian</h2>
+          <p className="text-indigo-400 text-xs font-bold tracking-[0.4em] uppercase opacity-60">Awakening Presence...</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
+  const [hasStarted, setHasStarted] = useState(false);
   const [mode, setMode] = useState<GuardianMode>(GuardianMode.EMPATHETIC);
   const [messages, setMessages] = useState<Message[]>([]);
   const [session, setSession] = useState<SessionState>({
@@ -175,9 +187,8 @@ export default function App() {
     1. BE CONCISE: Limit every response to ONE or TWO brief, impactful sentences.
     2. DO NOT REPEAT: Never restate what you just said or what the user just said. 
     3. BE PATIENT: Wait for the user to finish their thought completely. Do not rush to answer.
-    4. NO REPETITION: If the user repeats themselves, acknowledge it briefly ("I hear you saying that again...") and offer a fresh perspective or move forward.
-    5. NATURAL TONE: Speak like a wise friend, not a robot. 
-    6. NO MARKDOWN: Output plain text only.
+    4. NATURAL TONE: Speak like a wise friend, not a robot. 
+    5. NO MARKDOWN: Output plain text only.
   `;
 
   const resetAll = () => {
@@ -239,7 +250,6 @@ export default function App() {
               let sum = 0;
               for (let i = 0; i < inputData.length; i++) sum += inputData[i] * inputData[i];
               setInVol(Math.sqrt(sum / inputData.length));
-              // CRITICAL: Solely rely on sessionPromise resolves and then call session.sendRealtimeInput
               sessionPromise.then((session) => {
                 session.sendRealtimeInput({ media: createPcmBlob(inputData) });
               });
@@ -254,7 +264,6 @@ export default function App() {
               let sum = 0;
               for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
               setOutVol(sum / (dataArray.length * 255));
-              // Use sessionPromise to ensure loop only continues while session is alive
               sessionPromise.then(() => {
                 requestAnimationFrame(pollOutput);
               }).catch(() => {});
@@ -311,48 +320,52 @@ export default function App() {
     }
   };
 
+  if (!hasStarted) {
+    return <IntroSplash onFinish={() => setHasStarted(true)} />;
+  }
+
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#020617] font-sans relative overflow-hidden text-indigo-100">
-      {/* Background Celestial Pattern */}
+    <div className="celestial-bg flex flex-col h-screen max-w-lg mx-auto font-sans relative overflow-hidden">
+      {/* Decorative stardust overlay */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 pointer-events-none" />
 
       {/* Header */}
-      <header className="px-8 pt-8 pb-4 flex justify-between items-center z-20">
-        <div className="flex items-center gap-3">
-           <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-400/20 flex items-center justify-center shadow-inner">
-             <i className="fa-solid fa-star-of-life text-indigo-300 text-sm animate-spin" style={{ animationDuration: '8s' }} />
+      <header className="px-6 sm:px-10 pt-8 sm:pt-10 pb-4 flex justify-between items-center z-20">
+        <div className="flex items-center gap-4">
+           <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]">
+             <i className="fa-solid fa-star-of-life text-white text-base animate-spin" style={{ animationDuration: '10s' }} />
            </div>
            <div>
-             <h1 className="text-sm font-bold tracking-wider text-white glow-text uppercase">Guardian Presence</h1>
-             <p className="text-[8px] text-indigo-400 uppercase tracking-widest font-black">Celestial Intelligence v2</p>
+             <h1 className="text-sm font-black tracking-widest text-white glow-text uppercase">Guardian Presence</h1>
+             <p className="text-[9px] text-indigo-300 uppercase tracking-widest font-black">Celestial Intelligence v2</p>
            </div>
         </div>
         
         <button 
           onClick={resetAll}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 text-indigo-400 transition-colors"
+          className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-colors"
           title="Reset"
         >
-          <i className="fa-solid fa-wind text-xs" />
+          <i className="fa-solid fa-wind text-sm" />
         </button>
       </header>
 
       {/* Main Experience */}
-      <main className="flex-1 flex flex-col items-center justify-between px-6 py-4 z-10">
+      <main className="flex-1 flex flex-col items-center justify-between px-6 py-4 z-10 overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center w-full">
           <GuardianAura state={session} inVol={inVol} outVol={outVol} />
           
-          <div className="w-full max-w-xs mt-8">
-             <div className="grid grid-cols-2 gap-3">
+          <div className="w-full max-w-sm mt-8 sm:mt-12">
+             <div className="grid grid-cols-2 gap-4">
                 {Object.values(GuardianMode).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
                     disabled={session.isActive}
-                    className={`px-3 py-3 rounded-2xl text-[9px] font-bold border tracking-widest transition-all duration-500 ${
+                    className={`px-4 py-4 rounded-2xl text-[10px] sm:text-xs font-black border tracking-widest transition-all duration-500 ${
                       mode === m 
-                        ? 'border-indigo-400 bg-indigo-500/10 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
-                        : 'border-white/5 bg-white/[0.02] text-indigo-300/40 hover:text-indigo-200'
+                        ? 'border-white bg-white/20 text-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                        : 'border-white/10 bg-white/[0.03] text-white/50 hover:text-white/90 hover:bg-white/5'
                     } ${session.isActive ? 'opacity-20 cursor-not-allowed' : ''}`}
                   >
                     {m.split(' ')[0].toUpperCase()}
@@ -363,28 +376,28 @@ export default function App() {
         </div>
 
         {/* Transcript Area */}
-        <div className="w-full h-40 mt-6 bg-slate-900/40 rounded-[40px] border border-white/5 flex flex-col overflow-hidden backdrop-blur-xl shadow-2xl">
+        <div className="w-full h-48 sm:h-56 mt-8 glass-surface rounded-[40px] flex flex-col overflow-hidden shadow-2xl">
            <TranscriptView messages={messages} />
         </div>
       </main>
 
       {/* Control Area */}
-      <footer className="p-10 flex flex-col items-center z-20">
+      <footer className="p-8 sm:p-12 flex flex-col items-center z-20">
         {!session.isActive ? (
           <button
             onClick={startSession}
             disabled={session.isConnecting}
             className="group relative flex flex-col items-center"
           >
-            <div className="absolute -inset-12 bg-indigo-500/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative bg-[#0a0f1e] border border-indigo-400/20 hover:border-indigo-400/50 w-24 h-24 rounded-full flex items-center justify-center text-indigo-300 shadow-2xl transition-all transform active:scale-95 duration-500">
+            <div className="absolute -inset-16 bg-white/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative bg-white/10 border-2 border-white/20 hover:border-white/80 w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white shadow-2xl transition-all transform active:scale-90 duration-500">
               {session.isConnecting ? (
-                <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-300 rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
-                <i className="fa-solid fa-microphone text-3xl" />
+                <i className="fa-solid fa-microphone text-4xl" />
               )}
             </div>
-            <span className="mt-5 text-indigo-400/50 text-[8px] font-black uppercase tracking-[0.6em] group-hover:text-indigo-300 transition-colors">
+            <span className="mt-6 text-white text-[10px] font-black uppercase tracking-[0.5em] group-hover:glow-text transition-all">
               {session.isConnecting ? 'Aligning Spirit...' : 'Begin Communion'}
             </span>
           </button>
@@ -393,18 +406,17 @@ export default function App() {
             onClick={stopSession}
             className="group relative flex flex-col items-center"
           >
-             <div className="absolute -inset-10 bg-indigo-500/5 blur-3xl opacity-50" />
-             <div className="relative bg-slate-950/60 border border-white/10 hover:border-indigo-400/30 w-16 h-16 rounded-full flex items-center justify-center text-indigo-500/40 hover:text-indigo-300 transition-all transform active:scale-95">
-              <i className="fa-solid fa-stop text-sm" />
+             <div className="absolute -inset-10 bg-white/5 blur-3xl opacity-50" />
+             <div className="relative bg-slate-950/60 border border-white/30 hover:border-white/80 w-20 h-20 rounded-full flex items-center justify-center text-white transition-all transform active:scale-90">
+              <i className="fa-solid fa-stop text-lg" />
             </div>
-            <span className="mt-4 text-indigo-900 text-[8px] font-black uppercase tracking-[0.6em]">Rest Presence</span>
+            <span className="mt-5 text-white/60 text-[9px] font-black uppercase tracking-[0.5em]">Rest Presence</span>
           </button>
         )}
       </footer>
 
-      {/* Footer Branding */}
-      <div className="pb-8 text-center opacity-30">
-        <span className="text-[7px] text-indigo-400 font-bold uppercase tracking-[0.5em]">Celestial Encryption Active</span>
+      <div className="pb-8 text-center opacity-40">
+        <span className="text-[8px] text-white font-black uppercase tracking-[0.6em]">Celestial Encryption Active</span>
       </div>
     </div>
   );

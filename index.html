@@ -16,6 +16,10 @@
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
+      @keyframes orbit-reverse {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
+      }
       @keyframes float-particle {
         0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.2; }
         50% { transform: translate(20px, -20px) rotate(180deg); opacity: 0.6; }
@@ -23,6 +27,14 @@
       @keyframes flare-pulse {
         0%, 100% { opacity: 0.8; transform: scale(1); }
         50% { opacity: 1; transform: scale(1.1); }
+      }
+      @keyframes splash-reveal {
+        0% { opacity: 0; transform: scale(0.8); filter: blur(20px); }
+        100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+      }
+      @keyframes text-glow-pulse {
+        0%, 100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+        50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
       }
       .animate-soul {
         animation: soft-breathe 8s ease-in-out infinite;
@@ -36,10 +48,13 @@
       .animate-flare {
         animation: flare-pulse 4s ease-in-out infinite;
       }
+      .animate-splash {
+        animation: splash-reveal 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
       .glass-surface {
         background: rgba(15, 23, 42, 0.4);
         backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -49,10 +64,14 @@
         scrollbar-width: none;
       }
       .glow-text {
-        text-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
       }
       body {
+        background: #020617;
+      }
+      .celestial-bg {
         background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #020617 100%);
+        min-height: 100vh;
       }
       .celestial-glow {
         background: radial-gradient(circle, rgba(165, 180, 252, 0.4) 0%, rgba(79, 70, 229, 0) 70%);
@@ -69,7 +88,7 @@
 }
 </script>
 </head>
-  <body class="text-slate-200 min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
+  <body class="text-white min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
     <div id="root"></div>
   </body>
 </html>
