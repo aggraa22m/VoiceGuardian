@@ -21,7 +21,7 @@ If the app is already open on your screen, follow these steps to start talking:
 7.  **To Stop**: If you want to end the session, tap the small square button that says **"Rest Presence."**
 
 ### 💡 Tips for a Better Experience
-*   **Speak Normally**: You don't need to shout. The Guardian hears your whispers too.
+*   **Speak Normally**: You don't need to shout. The Guardian hears your whispers, too.
 *   **Take Your Time**: If you need to stop and think, the Guardian will wait for you. It won't interrupt.
 *   **Safety First**: If you are in a serious emergency, please remember to call your local emergency services (like 911). VoiceGuardian is a friend, but not a doctor.
 
